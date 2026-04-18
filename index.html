@@ -134,10 +134,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 </div>
 
 <div class="plan-bar">
-  <div class="plan-badge">無料プラン</div>
-  <span style="color:var(--text2)">今月の処理件数</span>
+  <div class="plan-badge" id="planBadge">無料プラン</div>
+  <span style="color:var(--text2)" id="planUsageLabel">今月の処理件数</span>
   <div class="plan-usage"><span id="usageCount">0</span> / 10 件</div>
-  <button class="btn-upgrade" onclick="openUpgrade()">アップグレード</button>
+  <button class="btn-upgrade" id="upgradeBtn" onclick="openUpgrade()">アップグレード</button>
   <div style="display:flex;gap:4px;margin-left:8px">
     <span id="langJa" onclick="switchLang('ja')" style="cursor:pointer;font-size:12px;font-weight:700;padding:3px 6px;border-radius:4px;background:var(--brand-light);color:var(--brand)">JP</span>
     <span id="langEn" onclick="switchLang('en')" style="cursor:pointer;font-size:12px;font-weight:400;padding:3px 6px;border-radius:4px;color:var(--text2)">EN</span>
@@ -145,10 +145,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('photo',this)">📷 写真</button>
-  <button class="tab" onclick="switchTab('pdf',this)">📄 PDF</button>
-  <button class="tab" onclick="switchTab('result',this)">📋 仕訳一覧</button>
-  <button class="tab" onclick="switchTab('settings',this)">⚙️ 設定</button>
+  <button class="tab active" id="tabPhoto" onclick="switchTab('photo',this)">📷 写真</button>
+  <button class="tab" id="tabPdf" onclick="switchTab('pdf',this)">📄 PDF</button>
+  <button class="tab" id="tabResult" onclick="switchTab('result',this)">📋 仕訳一覧</button>
+  <button class="tab" id="tabSettings" onclick="switchTab('settings',this)">⚙️ 設定</button>
 </div>
 
 <!-- 写真タブ -->
@@ -156,13 +156,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
   <div class="camera-btns">
     <button class="camera-btn" onclick="document.getElementById('cameraInput').click()">
       <span class="camera-btn-icon">📷</span>
-      <span class="camera-btn-label">カメラで撮影</span>
-      <span class="camera-btn-sub">領収書・レシートをその場で</span>
+      <span class="camera-btn-label" id="cameraBtnLabel">カメラで撮影</span>
+      <span class="camera-btn-sub" id="cameraBtnSub">領収書・レシートをその場で</span>
     </button>
     <button class="camera-btn" onclick="document.getElementById('photoInput').click()">
       <span class="camera-btn-icon">🖼️</span>
-      <span class="camera-btn-label">画像を選択</span>
-      <span class="camera-btn-sub">カメラロールから選ぶ</span>
+      <span class="camera-btn-label" id="galleryBtnLabel">画像を選択</span>
+      <span class="camera-btn-sub" id="galleryBtnSub">カメラロールから選ぶ</span>
     </button>
     <input type="file" id="cameraInput" accept="image/*" capture="environment">
     <input type="file" id="photoInput" accept="image/*" multiple>
@@ -183,8 +183,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
     ondragover="handleDragOver(event)"
     ondragleave="handleDragLeave(event)">
     <div class="drop-icon">📄</div>
-    <p><strong>クリックまたはドラッグ</strong>でPDFを追加</p>
-    <p style="margin-top:6px;font-size:12px">クレジット明細・高速道路明細・燃料明細など対応</p>
+    <p id="dropZoneMain"><strong>クリックまたはドラッグ</strong>でPDFを追加</p>
+    <p style="margin-top:6px;font-size:12px" id="dropZoneSub">クレジット明細・高速道路明細・燃料明細など対応</p>
     <input type="file" id="fileInput" multiple accept=".pdf" onchange="handleFileSelect(event)">
   </div>
 
@@ -204,7 +204,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 <div id="tab-result" style="display:none">
   <div id="resultSection" class="result-section">
     <div class="result-header">
-      <h2>生成された仕訳</h2>
+      <h2 id="resultTitle">生成された仕訳</h2>
       <span class="result-meta" id="resultMeta"></span>
     </div>
     <div class="table-wrap">
@@ -225,23 +225,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
     </div>
     <div id="emptyResult" class="empty-state" style="display:none">まだ仕訳がありません。写真またはPDFを解析してください。</div>
     <div class="action-row">
-      <button class="btn-outline" onclick="copyTSV()">コピー（タブ区切り）</button>
-      <button class="btn-outline btn-premium" onclick="openUpgrade()"><span class="lock">🔒</span>CSV出力（有料）</button>
-      <button class="btn-outline btn-premium" onclick="openUpgrade()"><span class="lock">🔒</span>スプレッドシート連携（有料）</button>
-      <button class="btn-outline btn-premium" onclick="openUpgrade()"><span class="lock">🔒</span>税理士に相談（有料）</button>
+      <button class="btn-outline" id="copyBtn" onclick="copyTSV()">コピー（タブ区切り）</button>
+      <button class="btn-outline btn-premium" id="csvBtn" onclick="openUpgrade()">🔒 CSV出力（有料）</button>
+      <button class="btn-outline btn-premium" id="sheetBtn" onclick="openUpgrade()">🔒 スプレッドシート連携（有料）</button>
+      <button class="btn-outline btn-premium" id="taxBtn" onclick="openUpgrade()">🔒 税理士に相談（有料）</button>
     </div>
   </div>
 </div>
 
 <!-- 設定タブ -->
 <div id="tab-settings" style="display:none">
-  <div class="section-title">Receipic ベータ版</div>
+  <div class="section-title" id="settingsSectionTitle">Receipic ベータ版</div>
   <div class="settings-box">
-    <h3>🎉 ベータ版をお試しいただきありがとうございます！</h3>
-    <p>現在ベータテスト中です。無料で<strong>月10件まで</strong>仕訳を生成できます。</p>
-    <p style="margin-top:10px">フィードバックやご意見はこちらまで：<br><strong>receipic@gmail.com</strong></p>
+    <h3 id="settingsTitle">🎉 ベータ版をお試しいただきありがとうございます！</h3>
+    <p id="settingsDesc">現在ベータテスト中です。無料で<strong>月10件まで</strong>仕訳を生成できます。</p>
+    <p style="margin-top:10px" id="settingsFeedback">フィードバックやご意見はこちらまで：<br><strong>receipic@gmail.com</strong></p>
     <div style="margin-top:12px;padding:10px 12px;background:var(--brand-light);border-radius:var(--radius);font-size:12px;color:var(--brand)">
-      正式リリース時には有料プランをご用意予定です。ベータ版ご利用者には特別割引を予定しています！
+      <span id="settingsPromo">正式リリース時には有料プランをご用意予定です。ベータ版ご利用者には特別割引を予定しています！</span>
     </div>
   </div>
 </div>
@@ -342,16 +342,55 @@ function switchLang(lang) {
 }
 
 function applyLang() {
-  document.getElementById('langJa').style.fontWeight = currentLang === 'ja' ? '700' : '400';
-  document.getElementById('langEn').style.fontWeight = currentLang === 'en' ? '700' : '400';
-  document.getElementById('analyzeBtn').textContent = t('analyzePdf');
-  document.getElementById('analyzePhotoBtn').textContent = t('analyzePhoto');
-  document.getElementById('adBannerText').textContent = t('adBanner');
+  const isEn = currentLang === 'en';
+  document.getElementById('langJa').style.fontWeight = !isEn ? '700' : '400';
+  document.getElementById('langEn').style.fontWeight = isEn ? '700' : '400';
+
+  /* プランバー */
+  document.getElementById('planBadge').textContent = isEn ? 'Free Plan' : '無料プラン';
+  document.getElementById('planUsageLabel').textContent = isEn ? 'This month' : '今月の処理件数';
+  document.getElementById('upgradeBtn').textContent = isEn ? 'Upgrade' : 'アップグレード';
+
+  /* タブ */
+  document.getElementById('tabPhoto').textContent = isEn ? '📷 Photo' : '📷 写真';
+  document.getElementById('tabPdf').textContent = isEn ? '📄 PDF' : '📄 PDF';
+  document.getElementById('tabResult').textContent = isEn ? '📋 Journal' : '📋 仕訳一覧';
+  document.getElementById('tabSettings').textContent = isEn ? '⚙️ Settings' : '⚙️ 設定';
+
+  /* 写真タブ */
+  document.getElementById('cameraBtnLabel').textContent = isEn ? 'Take Photo' : 'カメラで撮影';
+  document.getElementById('cameraBtnSub').textContent = isEn ? 'Capture receipt on the spot' : '領収書・レシートをその場で';
+  document.getElementById('galleryBtnLabel').textContent = isEn ? 'Select Image' : '画像を選択';
+  document.getElementById('galleryBtnSub').textContent = isEn ? 'Choose from gallery' : 'カメラロールから選ぶ';
+  document.getElementById('analyzePhotoBtn').textContent = isEn ? 'Analyze photos & create journal entries' : '写真を解析して仕訳を作成';
+
+  /* PDFタブ */
+  document.getElementById('dropZoneMain').innerHTML = isEn ? '<strong>Click or drag</strong> to add PDF' : '<strong>クリックまたはドラッグ</strong>でPDFを追加';
+  document.getElementById('dropZoneSub').textContent = isEn ? 'Credit cards, tolls, fuel receipts supported' : 'クレジット明細・高速道路明細・燃料明細など対応';
+  document.getElementById('analyzeBtn').textContent = isEn ? 'Analyze PDF & create journal entries' : 'PDFを解析して仕訳を作成';
+
+  /* 仕訳一覧 */
+  document.getElementById('resultTitle').textContent = isEn ? 'Journal Entries' : '生成された仕訳';
+  document.getElementById('copyBtn').textContent = isEn ? 'Copy (Tab-separated)' : 'コピー（タブ区切り）';
+  document.getElementById('csvBtn').innerHTML = isEn ? '🔒 Export CSV (Premium)' : '🔒 CSV出力（有料）';
+  document.getElementById('sheetBtn').innerHTML = isEn ? '🔒 Spreadsheet Sync (Premium)' : '🔒 スプレッドシート連携（有料）';
+  document.getElementById('taxBtn').innerHTML = isEn ? '🔒 Tax Advisor (Premium)' : '🔒 税理士に相談（有料）';
+
+  /* 設定タブ */
+  document.getElementById('settingsSectionTitle').textContent = isEn ? 'RECEIPIC BETA' : 'RECEIPIC ベータ版';
+  document.getElementById('settingsTitle').textContent = isEn ? '🎉 Thank you for trying Receipic Beta!' : '🎉 ベータ版をお試しいただきありがとうございます！';
+  document.getElementById('settingsDesc').textContent = isEn ? 'Currently in beta. Free up to 10 journal entries per month.' : '現在ベータテスト中です。無料で月10件まで仕訳を生成できます。';
+  document.getElementById('settingsFeedback').innerHTML = isEn ? 'Feedback: <strong>receipic@gmail.com</strong>' : 'フィードバックやご意見はこちらまで：<br><strong>receipic@gmail.com</strong>';
+  document.getElementById('settingsPromo').textContent = isEn ? 'Premium plans coming soon. Beta users get a special discount!' : '<span id="settingsPromo">正式リリース時には有料プランをご用意予定です。ベータ版ご利用者には特別割引を予定しています！</span>';
+
+  /* テーブルヘッダー */
   const thMap = {date:'th-date',debit:'th-debit',credit:'th-credit',amount:'th-amount',tax:'th-tax',desc:'th-desc'};
   Object.entries(thMap).forEach(([key,id]) => {
     const el = document.getElementById(id);
     if(el) el.textContent = t(key);
   });
+
+  document.getElementById('adBannerText').textContent = t('adBanner');
   if(entries.length) renderEntries(entries);
 }
 
