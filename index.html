@@ -164,8 +164,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       <span class="camera-btn-label">画像を選択</span>
       <span class="camera-btn-sub">カメラロールから選ぶ</span>
     </button>
-    <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
-    <input type="file" id="photoInput" accept="image/*" multiple onchange="handlePhotoSelect(event)">
+    <input type="file" id="cameraInput" accept="image/*" capture="environment">
+    <input type="file" id="photoInput" accept="image/*" multiple>
   </div>
 
   <div class="file-list" id="photoList"></div>
@@ -898,6 +898,8 @@ const STRIPE_LINK = 'https://buy.stripe.com/test_4gM28r5X58RfaFx7WTcQU00';
 function openUpgrade() { window.open(STRIPE_LINK, '_blank'); }
 function closeUpgrade() { document.getElementById('upgradeModal').classList.remove('open'); }
 document.getElementById('upgradeModal').addEventListener('click', e => { if(e.target.id === 'upgradeModal') closeUpgrade(); });
+document.getElementById('cameraInput').addEventListener('change', handlePhotoSelect);
+document.getElementById('photoInput').addEventListener('change', handlePhotoSelect);
 applyLang();
 </script>
 </body>
