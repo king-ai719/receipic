@@ -366,7 +366,7 @@ let usageCount = parseInt(localStorage.getItem('receipic_usage') || '0');
 
 document.getElementById('usageCount').textContent = usageCount;
 
-function getApiKey() { return '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'; }
+function getApiKey() { return 'REPLACE_WITH_API_KEY'; }
 
 /* initKeyStatus削除済み */
 
@@ -725,13 +725,10 @@ async function callApi(body, fileName) {
     ...body
   };
 
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+  const resp = await fetch('https://tight-bush-a0e1.tk-xx719.workers.dev', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': getApiKey(),
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-allow-browser-access': 'true',
     },
     body: JSON.stringify(payload)
   });
