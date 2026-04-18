@@ -136,7 +136,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 <div class="plan-bar">
   <div class="plan-badge" id="planBadge">無料プラン</div>
   <span style="color:var(--text2)" id="planUsageLabel">今月の処理件数</span>
-  <div class="plan-usage"><span id="usageCount">0</span> / 10 件</div>
+  <div class="plan-usage"><span id="usageCount">0</span> <span id="usageUnit">/ 10 件</span></div>
   <button class="btn-upgrade" id="upgradeBtn" onclick="openUpgrade()">アップグレード</button>
   <div style="display:flex;gap:4px;margin-left:8px">
     <span id="langJa" onclick="switchLang('ja')" style="cursor:pointer;font-size:12px;font-weight:700;padding:3px 6px;border-radius:4px;background:var(--brand-light);color:var(--brand)">JP</span>
@@ -217,7 +217,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
             <th style="text-align:right">金額</th>
             <th>税区分</th>
             <th>摘要</th>
-            <th>出典</th>
+            <th id="th-source">出典</th>
           </tr>
         </thead>
         <tbody id="entriesBody"></tbody>
@@ -383,12 +383,25 @@ function applyLang() {
   document.getElementById('settingsFeedback').innerHTML = isEn ? 'Feedback: <strong>receipic@gmail.com</strong>' : 'フィードバックやご意見はこちらまで：<br><strong>receipic@gmail.com</strong>';
   document.getElementById('settingsPromo').textContent = isEn ? 'Premium plans coming soon. Beta users get a special discount!' : '<span id="settingsPromo">正式リリース時には有料プランをご用意予定です。ベータ版ご利用者には特別割引を予定しています！</span>';
 
+  /* 件数表示 */
+  const usageUnit = document.getElementById('usageUnit');
+  if(usageUnit) usageUnit.textContent = isEn ? '/ 10 items' : '/ 10 件';
+
   /* テーブルヘッダー */
-  const thMap = {date:'th-date',debit:'th-debit',credit:'th-credit',amount:'th-amount',tax:'th-tax',desc:'th-desc'};
-  Object.entries(thMap).forEach(([key,id]) => {
+  const thLabels = {
+    'th-date': isEn ? 'Date' : '日付',
+    'th-debit': isEn ? 'Debit' : '借方科目',
+    'th-credit': isEn ? 'Credit' : '貸方科目',
+    'th-amount': isEn ? 'Amount' : '金額',
+    'th-tax': isEn ? 'Tax' : '税区分',
+    'th-desc': isEn ? 'Description' : '摘要',
+  };
+  Object.entries(thLabels).forEach(([id, label]) => {
     const el = document.getElementById(id);
-    if(el) el.textContent = t(key);
+    if(el) el.textContent = label;
   });
+  const outEl = document.getElementById('th-source');
+  if(outEl) outEl.textContent = isEn ? 'Source' : '出典';
 
   document.getElementById('adBannerText').textContent = t('adBanner');
   if(entries.length) renderEntries(entries);
@@ -483,7 +496,7 @@ async function startPhotoAnalysis() {
       const f = photoFiles[i];
       statusBox.style.display = '';
       statusBox.className = 'status-box status-loading';
-      statusBox.innerHTML = `<span class="spinner"></span>(${i+1}/${photoFiles.length}) ${f.name} を解析中...`;
+      statusBox.innerHTML = `<span class="spinner"></span>(${i+1}/${photoFiles.length}) ${currentLang === 'en' ? 'Analyzing ' + f.name + '...' : f.name + ' を解析中...'}`;
       const result = await analyzeImage(f);
       all.push(...result);
       usageCount++;
@@ -491,7 +504,7 @@ async function startPhotoAnalysis() {
       document.getElementById('usageCount').textContent = usageCount;
     }
     entries.push(...all);
-    document.getElementById('resultMeta').textContent = `${entries.length}件の仕訳を生成`;
+    document.getElementById('resultMeta').textContent = currentLang === 'en' ? `${entries.length} entries generated` : `${entries.length}件の仕訳を生成`;
     statusBox.className = 'status-box status-success';
     statusBox.innerHTML = `✓ ${all.length}件の仕訳を生成しました。「仕訳一覧」タブで確認できます。`;
     setTimeout(() => { statusBox.style.display = 'none'; }, 3000);
@@ -587,7 +600,7 @@ async function startAnalysis() {
     }
     entries = all;
     renderEntries(entries);
-    document.getElementById('resultMeta').textContent = `${entries.length}件の仕訳を生成`;
+    document.getElementById('resultMeta').textContent = currentLang === 'en' ? `${entries.length} entries generated` : `${entries.length}件の仕訳を生成`;
     document.getElementById('resultSection').style.display = '';
     setStatus('success', `✓ ${entries.length}件の仕訳を生成しました`);
     setTimeout(clearStatus, 3000);
@@ -833,7 +846,7 @@ function fallback(fileName) {
 function renderEntries(list) {
   const tbody = document.getElementById('entriesBody');
   const sorted = [...list].sort((a,b) => (a.date||'').localeCompare(b.date||''));
-  if(!sorted.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">データなし</td></tr>'; return; }
+  if(!sorted.length) { tbody.innerHTML = `<tr><td colspan="7" class="empty-state">${currentLang === 'en' ? 'No data' : 'データなし'}</td></tr>`; return; }
   tbody.innerHTML = sorted.map((e, i) => {
     const realIdx = entries.indexOf(e);
     const amt   = Number(e.amount || 0).toLocaleString('ja-JP');
@@ -860,7 +873,7 @@ function renderEntries(list) {
 function deleteEntry(idx) {
   if(!confirm('この仕訳を削除しますか？')) return;
   entries.splice(idx, 1);
-  document.getElementById('resultMeta').textContent = `${entries.length}件の仕訳を生成`;
+  document.getElementById('resultMeta').textContent = currentLang === 'en' ? `${entries.length} entries generated` : `${entries.length}件の仕訳を生成`;
   renderEntries(entries);
   if(!entries.length) document.getElementById('resultSection').style.display = 'none';
 }
