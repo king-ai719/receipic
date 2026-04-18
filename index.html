@@ -368,28 +368,9 @@ document.getElementById('usageCount').textContent = usageCount;
 
 function getApiKey() { return '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'; }
 
-function initKeyStatus() {
-  const k = getApiKey();
-  const el = document.getElementById('keyStatus');
-  if(k) {
-    el.className = 'key-status key-ok';
-    el.textContent = '✓ APIキー設定済み (' + k.slice(0,18) + '...)';
-    document.getElementById('apiKeyInput').value = k;
-  } else {
-    el.className = 'key-status key-none';
-    el.textContent = 'APIキーが未設定です';
-  }
-}
-initKeyStatus();
+/* initKeyStatus削除済み */
 
-function saveApiKey() {
-  const k = document.getElementById('apiKeyInput').value.trim();
-  if(!k) return;
-  localStorage.setItem('receipic_api_key', k);
-  initKeyStatus();
-  setStatus('success', '✓ APIキーを保存しました');
-  setTimeout(clearStatus, 2500);
-}
+/* saveApiKey削除済み */
 
 function switchTab(tab, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
