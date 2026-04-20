@@ -248,24 +248,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 
 <!-- アップグレードモーダル -->
 <div class="modal-bg" id="upgradeModal">
-  <div class="modal">
+  <div class="modal" style="width:min(600px,95vw)">
     <button class="modal-close" onclick="closeUpgrade()">✕</button>
-    <h3>プランをアップグレード</h3>
-    <p>有料プランでCSV出力・スプレッドシート連携・スキャンPDF無制限・税理士紹介などが使えます。</p>
-    <div class="plans">
+    <h3 id="modalTitle">プランをアップグレード</h3>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px;background:var(--color-background-secondary);border-radius:var(--radius);padding:4px">
+      <button id="billingMonthly" onclick="setBilling('monthly')" style="flex:1;padding:6px;border:none;border-radius:6px;cursor:pointer;font-size:13px;background:var(--bg);font-weight:600">月払い</button>
+      <button id="billingYearly" onclick="setBilling('yearly')" style="flex:1;padding:6px;border:none;border-radius:6px;cursor:pointer;font-size:13px;background:transparent;color:var(--text2)">年払い <span style="font-size:11px;color:var(--brand)">2ヶ月お得</span></button>
+    </div>
+
+    <div class="plans" style="grid-template-columns:repeat(3,1fr)">
       <div class="plan-card">
-        <div class="plan-name" style="color:var(--text2)">無料</div>
+        <div class="plan-name" style="color:var(--text2)" id="planFreeName">無料</div>
         <div class="plan-price">¥0<span>/月</span></div>
-        <div class="plan-feats">✓ 月20件まで<br>✓ 広告あり<br>✓ テキストPDF<br>✓ 7日間保存</div>
+        <div class="plan-feats" id="planFreeFeats">✓ 月10件まで<br>✓ 広告あり<br>✓ PDF・写真対応</div>
       </div>
       <div class="plan-card featured">
-        <div class="plan-name" style="color:var(--brand)">スタンダード</div>
-        <div class="plan-price" style="color:var(--brand)">¥980<span>/月</span></div>
-        <div class="plan-feats">✓ 無制限<br>✓ 広告なし<br>✓ スキャンPDF対応<br>✓ CSV・スプレッドシート<br>✓ 税理士紹介<br>✓ 永久保存</div>
+        <div class="plan-name" style="color:var(--brand)">Standard</div>
+        <div class="plan-price" style="color:var(--brand)" id="planStandardPrice">¥1,280<span>/月</span></div>
+        <div class="plan-feats" id="planStandardFeats">✓ 月80件まで<br>✓ 広告なし<br>✓ CSV出力<br>✓ スプレッドシート連携<br>✓ 税理士紹介</div>
+        <button class="analyze-btn" style="margin-top:12px;padding:8px" id="btnStandard" onclick="goStripe('standard')">このプランを選ぶ</button>
+      </div>
+      <div class="plan-card" style="border-color:var(--text2)">
+        <div class="plan-name" style="color:var(--text)">PRO</div>
+        <div class="plan-price" id="planProPrice">¥2,980<span>/月</span></div>
+        <div class="plan-feats" id="planProFeats">✓ 月200件まで<br>✓ Standardの全機能<br>✓ 優先サポート</div>
+        <button class="analyze-btn" style="margin-top:12px;padding:8px;background:var(--text)" id="btnPro" onclick="goStripe('pro')">このプランを選ぶ</button>
       </div>
     </div>
-    <div class="modal-year">年払い ¥9,800/年（2ヶ月分お得）</div>
-    <button class="analyze-btn" onclick="closeUpgrade()">閉じる</button>
+    <button class="btn-outline" style="width:100%;margin-top:8px" onclick="closeUpgrade()">閉じる</button>
   </div>
 </div>
 
@@ -928,9 +939,44 @@ function copyTSV() {
   });
 }
 
-const STRIPE_LINK = 'https://buy.stripe.com/test_4gM28r5X58RfaFx7WTcQU00';
-function openUpgrade() { window.open(STRIPE_LINK, '_blank'); }
+const STRIPE_LINKS = {
+  standard_monthly: 'https://buy.stripe.com/test_00w5kD3OXc3r7tlelhcQU01',
+  standard_yearly:  'https://buy.stripe.com/test_fZucN53OX6J7cNFgtpcQU02',
+  pro_monthly:      'https://buy.stripe.com/test_28E28r2KTgjHbJBcd9cQU03',
+  pro_yearly:       'https://buy.stripe.com/test_aFa8wPbhpgjH7tl1yvcQU05',
+};
+
+function openUpgrade() {
+  document.getElementById('upgradeModal').classList.add('open');
+}
 function closeUpgrade() { document.getElementById('upgradeModal').classList.remove('open'); }
+
+let currentBilling = 'monthly';
+
+function setBilling(type) {
+  currentBilling = type;
+  const isEn = currentLang === 'en';
+  const isYearly = type === 'yearly';
+
+  document.getElementById('billingMonthly').style.background = !isYearly ? 'var(--bg)' : 'transparent';
+  document.getElementById('billingMonthly').style.color = !isYearly ? 'var(--text)' : 'var(--text2)';
+  document.getElementById('billingYearly').style.background = isYearly ? 'var(--bg)' : 'transparent';
+  document.getElementById('billingYearly').style.color = isYearly ? 'var(--text)' : 'var(--text2)';
+
+  if(isYearly) {
+    document.getElementById('planStandardPrice').innerHTML = isEn ? '¥12,800<span>/yr</span>' : '¥12,800<span>/年</span>';
+    document.getElementById('planProPrice').innerHTML = isEn ? '¥29,800<span>/yr</span>' : '¥29,800<span>/年</span>';
+  } else {
+    document.getElementById('planStandardPrice').innerHTML = isEn ? '¥1,280<span>/mo</span>' : '¥1,280<span>/月</span>';
+    document.getElementById('planProPrice').innerHTML = isEn ? '¥2,980<span>/mo</span>' : '¥2,980<span>/月</span>';
+  }
+}
+
+function goStripe(plan) {
+  const isYearly = currentBilling === 'yearly';
+  const key = plan + '_' + currentBilling;
+  window.open(STRIPE_LINKS[key], '_blank');
+}
 document.getElementById('upgradeModal').addEventListener('click', e => { if(e.target.id === 'upgradeModal') closeUpgrade(); });
 document.getElementById('cameraInput').addEventListener('change', handlePhotoSelect);
 document.getElementById('photoInput').addEventListener('change', handlePhotoSelect);
