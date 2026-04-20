@@ -156,6 +156,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
   <button class="tab active" id="tabPhoto" onclick="switchTab('photo',this)">📷 写真</button>
   <button class="tab" id="tabPdf" onclick="switchTab('pdf',this)">📄 PDF</button>
   <button class="tab" id="tabResult" onclick="switchTab('result',this)">📋 仕訳一覧</button>
+  <button class="tab" id="tabHistory" onclick="switchTab('history',this)">🕐 履歴</button>
   <button class="tab" id="tabSettings" onclick="switchTab('settings',this)">⚙️ 設定</button>
 </div>
 
@@ -253,6 +254,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       <button class="btn-outline btn-premium" id="csvBtn" onclick="openUpgrade()">🔒 CSV出力（有料）</button>
       <button class="btn-outline btn-premium" id="sheetBtn" onclick="openUpgrade()">🔒 スプレッドシート連携（有料）</button>
       <button class="btn-outline btn-premium" id="taxBtn" onclick="openUpgrade()">🔒 税理士に相談（有料）</button>
+    </div>
+  </div>
+</div>
+
+<!-- 履歴タブ -->
+<div id="tab-history" style="display:none">
+  <div class="result-section">
+    <div class="result-header">
+      <h2 id="historyTitle">保存済み仕訳</h2>
+      <span class="result-meta" id="historyMeta"></span>
+    </div>
+    <div class="table-wrap">
+      <table class="entries-table">
+        <thead>
+          <tr>
+            <th id="hth-date">日付</th>
+            <th id="hth-debit">借方科目</th>
+            <th id="hth-credit">貸方科目</th>
+            <th id="hth-amount" style="text-align:right">金額</th>
+            <th id="hth-tax">税区分</th>
+            <th id="hth-desc">摘要</th>
+            <th id="hth-source">出典</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+    <div class="action-row" style="margin-top:1rem">
+      <button class="btn-outline" id="exportHistoryBtn" onclick="exportHistoryCSV()">📥 CSV出力</button>
+      <button class="btn-outline" id="clearHistoryBtn" onclick="clearHistory()" style="color:var(--err);border-color:var(--err)">🗑️ 履歴を削除</button>
     </div>
   </div>
 </div>
@@ -473,10 +504,11 @@ function getApiKey() { return 'REPLACE_WITH_API_KEY'; }
 function switchTab(tab, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  ['photo','pdf','result','settings'].forEach(t => {
+  ['photo','pdf','result','history','settings'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t === tab ? '' : 'none';
   });
   if(tab === 'result') renderEntries(entries);
+  if(tab === 'history') renderHistory();
 }
 
 let photoFiles = [];
@@ -645,6 +677,7 @@ async function startAnalysis() {
       document.getElementById('usageCount').textContent = usageCount;
     }
     entries = all;
+    saveToHistory(all);
     renderEntries(entries);
     document.getElementById('resultMeta').textContent = currentLang === 'en' ? `${entries.length} entries generated` : `${entries.length}件の仕訳を生成`;
     document.getElementById('resultSection').style.display = '';
@@ -968,6 +1001,76 @@ function copyTSV() {
     setStatus('success', '✓ クリップボードにコピーしました');
     setTimeout(clearStatus, 2000);
   });
+}
+
+
+/* 履歴管理 */
+function saveToHistory(newEntries) {
+  const key = 'receipic_history';
+  const existing = JSON.parse(localStorage.getItem(key) || '[]');
+  const merged = [...existing, ...newEntries];
+  localStorage.setItem(key, JSON.stringify(merged));
+}
+
+function loadHistory() {
+  return JSON.parse(localStorage.getItem('receipic_history') || '[]');
+}
+
+function clearHistory() {
+  if(confirm(currentLang === 'en' ? 'Clear all history?' : '履歴をすべて削除しますか？')) {
+    localStorage.removeItem('receipic_history');
+    renderHistory();
+  }
+}
+
+function renderHistory() {
+  const list = loadHistory();
+  const tbody = document.getElementById('historyBody');
+  const meta = document.getElementById('historyMeta');
+  const isEn = currentLang === 'en';
+
+  if(!tbody) return;
+
+  meta.textContent = isEn ? `${list.length} entries saved` : `${list.length}件保存済み`;
+
+  if(!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">${isEn ? 'No history yet' : '履歴がありません'}</td></tr>`;
+    return;
+  }
+
+  const sorted = [...list].sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  tbody.innerHTML = sorted.map(e => {
+    const amt = Number(e.amount||0).toLocaleString('ja-JP');
+    const src = String(e.source||'').replace(/\.pdf$/i,'').slice(0,12);
+    const taxCl = (e.taxCode||'').includes('課税') ? 'tax-badge' : 'tax-badge free';
+    return `<tr>
+      <td>${e.date||''}</td>
+      <td class="debit">${e.debit||''}</td>
+      <td class="credit">${e.credit||''}</td>
+      <td class="amount">¥${amt}</td>
+      <td><span class="${taxCl}">${e.taxCode||''}</span></td>
+      <td>${e.description||''}</td>
+      <td><span class="source-badge">${src}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function exportHistoryCSV() {
+  const list = loadHistory();
+  if(!list.length) return;
+  const isEn = currentLang === 'en';
+  const header = isEn
+    ? ['Date','Debit','Credit','Amount','Tax','Description','Source']
+    : ['日付','借方科目','貸方科目','金額','税区分','摘要','出典'];
+  const rows = list.map(e => [e.date,e.debit,e.credit,e.amount,e.taxCode,e.description,e.source]);
+  const csv = [header,...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `receipic_history_${new Date().toISOString().slice(0,7)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 const STRIPE_LINKS = {
