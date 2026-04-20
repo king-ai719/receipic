@@ -404,6 +404,8 @@ function applyLang() {
   if(outEl) outEl.textContent = isEn ? 'Source' : '出典';
 
   document.getElementById('adBannerText').textContent = t('adBanner');
+  const adPdf = document.getElementById('adBannerPdf');
+  if(adPdf) adPdf.textContent = isEn ? '📢 Ad space (Free Plan) — Upgrade to hide' : '📢 広告スペース（無料プラン）— アップグレードで非表示に';
   if(entries.length) renderEntries(entries);
 }
 
