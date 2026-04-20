@@ -172,7 +172,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 
   <button class="analyze-btn" id="analyzePhotoBtn" onclick="startPhotoAnalysis()" disabled>写真を解析して仕訳を作成</button>
   <div id="photoStatusBox" style="display:none" class="status-box"></div>
-  <div class="ad-banner" id="adBannerText">📢 広告スペース（無料プラン）— アップグレードで非表示に</div>
+  <div class="ad-banner" id="adBannerPhoto">📢 広告スペース（無料プラン）— アップグレードで非表示に</div>
 </div>
 
 <!-- PDFタブ -->
@@ -403,9 +403,11 @@ function applyLang() {
   const outEl = document.getElementById('th-source');
   if(outEl) outEl.textContent = isEn ? 'Source' : '出典';
 
-  document.getElementById('adBannerText').textContent = t('adBanner');
-  const adPdf = document.getElementById('adBannerPdf');
-  if(adPdf) adPdf.textContent = isEn ? '📢 Ad space (Free Plan) — Upgrade to hide' : '📢 広告スペース（無料プラン）— アップグレードで非表示に';
+  const adText = isEn ? '📢 Ad space (Free Plan) — Upgrade to hide' : '📢 広告スペース（無料プラン）— アップグレードで非表示に';
+  ['adBannerText','adBannerPhoto','adBannerPdf'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = adText;
+  });
   if(entries.length) renderEntries(entries);
 }
 
