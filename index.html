@@ -282,7 +282,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       </table>
     </div>
     <div class="action-row" style="margin-top:1rem">
-      <button class="btn-outline btn-premium" id="exportHistoryBtn" onclick="openUpgrade()">🔒 CSV出力（有料）</button>
+      <button class="btn-outline btn-premium" id="exportHistoryBtn" onclick="openUpgrade()"><span class="lock">🔒</span>CSV出力（有料）</button>
       <button class="btn-outline" id="clearHistoryBtn" onclick="clearHistory()" style="color:var(--err);border-color:var(--err)">🗑️ 履歴を削除</button>
     </div>
   </div>
@@ -460,7 +460,7 @@ function applyLang() {
     if(el) el.textContent = label;
   });
   const expBtn = document.getElementById('exportHistoryBtn');
-  if(expBtn) expBtn.textContent = isEn ? '📥 Export CSV' : '📥 CSV出力';
+  if(expBtn) expBtn.innerHTML = isEn ? '<span class="lock">🔒</span>Export CSV (Premium)' : '<span class="lock">🔒</span>CSV出力（有料）';
   const clrBtn = document.getElementById('clearHistoryBtn');
   if(clrBtn) clrBtn.textContent = isEn ? '🗑️ Clear history' : '🗑️ 履歴を削除';
   const tabHistory = document.getElementById('tabHistory');
