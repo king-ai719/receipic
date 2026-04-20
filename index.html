@@ -282,7 +282,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       </table>
     </div>
     <div class="action-row" style="margin-top:1rem">
-      <button class="btn-outline" id="exportHistoryBtn" onclick="exportHistoryCSV()">📥 CSV出力</button>
+      <button class="btn-outline btn-premium" id="exportHistoryBtn" onclick="openUpgrade()">🔒 CSV出力（有料）</button>
       <button class="btn-outline" id="clearHistoryBtn" onclick="clearHistory()" style="color:var(--err);border-color:var(--err)">🗑️ 履歴を削除</button>
     </div>
   </div>
@@ -443,6 +443,30 @@ function applyLang() {
   document.getElementById('taxBtn').innerHTML = isEn ? '🔒 Tax Advisor (Premium)' : '🔒 税理士に相談（有料）';
 
   /* 設定タブ */
+  /* 履歴タブ */
+  const histTitle = document.getElementById('historyTitle');
+  if(histTitle) histTitle.textContent = isEn ? 'Saved Entries' : '保存済み仕訳';
+  const hthMap = {
+    'hth-date': isEn ? 'Date' : '日付',
+    'hth-debit': isEn ? 'Debit' : '借方科目',
+    'hth-credit': isEn ? 'Credit' : '貸方科目',
+    'hth-amount': isEn ? 'Amount' : '金額',
+    'hth-tax': isEn ? 'Tax' : '税区分',
+    'hth-desc': isEn ? 'Description' : '摘要',
+    'hth-source': isEn ? 'Source' : '出典',
+  };
+  Object.entries(hthMap).forEach(([id,label]) => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = label;
+  });
+  const expBtn = document.getElementById('exportHistoryBtn');
+  if(expBtn) expBtn.textContent = isEn ? '📥 Export CSV' : '📥 CSV出力';
+  const clrBtn = document.getElementById('clearHistoryBtn');
+  if(clrBtn) clrBtn.textContent = isEn ? '🗑️ Clear history' : '🗑️ 履歴を削除';
+  const tabHistory = document.getElementById('tabHistory');
+  if(tabHistory) tabHistory.textContent = isEn ? '🕐 History' : '🕐 履歴';
+  renderHistory();
+
   document.getElementById('settingsSectionTitle').textContent = isEn ? 'RECEIPIC BETA' : 'RECEIPIC ベータ版';
   document.getElementById('settingsTitle').textContent = isEn ? '🎉 Thank you for trying Receipic Beta!' : '🎉 ベータ版をお試しいただきありがとうございます！';
   document.getElementById('settingsDesc').textContent = isEn ? 'Currently in beta. Free up to 10 journal entries per month.' : '現在ベータテスト中です。無料で月10件まで仕訳を生成できます。';
