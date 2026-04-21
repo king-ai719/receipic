@@ -484,6 +484,17 @@ function applyLang() {
   }
 
   document.getElementById('settingsSectionTitle').textContent = isEn ? 'RECEIPIC BETA' : 'RECEIPIC ベータ版';
+  const actSection = document.getElementById('activationSectionTitle');
+  if(actSection) actSection.textContent = isEn ? 'PLAN ACTIVATION' : 'プランのアクティベーション';
+  const actTitle = document.getElementById('activationTitle');
+  if(actTitle) actTitle.textContent = isEn ? '🔑 Enter Activation Code' : '🔑 アクティベーションコードを入力';
+  const actDesc = document.getElementById('activationDesc');
+  if(actDesc) actDesc.textContent = isEn ? 'Enter the code sent after purchase.' : '購入後に送付されたコードを入力してください。';
+  const actBtn = document.getElementById('activationBtn');
+  if(actBtn) actBtn.textContent = isEn ? 'Apply' : '適用';
+  const actInput = document.getElementById('activationInput');
+  if(actInput) actInput.placeholder = isEn ? 'STANDARD-XXXX' : 'STANDARD-XXXX';
+  updatePlanUI();
   document.getElementById('settingsTitle').textContent = isEn ? '🎉 Thank you for trying Receipic Beta!' : '🎉 ベータ版をお試しいただきありがとうございます！';
   document.getElementById('settingsDesc').textContent = isEn ? 'Currently in beta. Free up to 10 journal entries per month.' : '現在ベータテスト中です。無料で月10件まで仕訳を生成できます。';
   document.getElementById('settingsFeedback').innerHTML = isEn ? 'Feedback: <strong>receipic@gmail.com</strong>' : 'フィードバックやご意見はこちらまで：<br><strong>receipic@gmail.com</strong>';
@@ -603,7 +614,7 @@ function renderPhotoList() {
 async function startPhotoAnalysis() {
   if(!photoFiles.length) return;
 
-  if(usageCount >= FREE_LIMIT) { openUpgrade(); return; }
+  if(usageCount >= getPlanLimit()) { openUpgrade(); return; }
 
   document.getElementById('analyzePhotoBtn').disabled = true;
   const statusBox = document.getElementById('photoStatusBox');
@@ -699,7 +710,7 @@ async function toBase64(file) {
 async function startAnalysis() {
   if(!files.length) return;
 
-  if(usageCount >= FREE_LIMIT) { openUpgrade(); return; }
+  if(usageCount >= getPlanLimit()) { openUpgrade(); return; }
 
   document.getElementById('analyzeBtn').disabled = true;
   document.getElementById('resultSection').style.display = 'none';
@@ -1121,6 +1132,73 @@ function exportHistoryCSV() {
   URL.revokeObjectURL(url);
 }
 
+
+/* プラン管理 */
+const PLANS = {
+  free:     { limit: 10,  name: 'Free',     nameJa: '無料' },
+  standard: { limit: 80,  name: 'Standard', nameJa: 'スタンダード' },
+  pro:      { limit: 200, name: 'PRO',      nameJa: 'PRO' },
+};
+
+const ACTIVATION_CODES = {
+  /* テスト用コード - 本番では変更すること */
+  'STANDARD-2024': 'standard',
+  'PRO-2024': 'pro',
+};
+
+function getCurrentPlan() {
+  return localStorage.getItem('receipic_plan') || 'free';
+}
+
+function getPlanLimit() {
+  return PLANS[getCurrentPlan()].limit;
+}
+
+function activatePlan(code) {
+  const plan = ACTIVATION_CODES[code.trim().toUpperCase()];
+  if(plan) {
+    localStorage.setItem('receipic_plan', plan);
+    updatePlanUI();
+    return true;
+  }
+  return false;
+}
+
+function updatePlanUI() {
+  const plan = getCurrentPlan();
+  const isEn = currentLang === 'en';
+  const planName = isEn ? PLANS[plan].name : PLANS[plan].nameJa;
+  const limit = PLANS[plan].limit;
+
+  /* プランバッジ更新 */
+  const badge = document.getElementById('planBadge');
+  if(badge) badge.textContent = isEn ? planName + ' Plan' : planName + 'プラン';
+
+  /* 件数上限更新 */
+  const unit = document.getElementById('usageUnit');
+  if(unit) unit.textContent = isEn ? `/ ${limit} items` : `/ ${limit} 件`;
+
+  /* 広告非表示（有料プラン） */
+  ['adBannerPhoto','adBannerText'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = plan === 'free' ? '' : 'none';
+  });
+
+  /* アクティベーション状態表示 */
+  const statusEl = document.getElementById('activationStatus');
+  if(statusEl) {
+    if(plan === 'free') {
+      statusEl.className = 'key-status key-none';
+      statusEl.textContent = isEn ? 'Free Plan (10 entries/month)' : '無料プラン（月10件）';
+    } else {
+      statusEl.className = 'key-status key-ok';
+      statusEl.textContent = isEn
+        ? `${PLANS[plan].name} Plan active (${limit} entries/month)`
+        : `${PLANS[plan].nameJa}プラン有効（月${limit}件）`;
+    }
+  }
+}
+
 const STRIPE_LINKS = {
   standard_monthly: 'https://buy.stripe.com/test_00w5kD3OXc3r7tlelhcQU01',
   standard_yearly:  'https://buy.stripe.com/test_fZucN53OX6J7cNFgtpcQU02',
@@ -1189,7 +1267,20 @@ function openExternalBrowser() {
   }
 }
 
+function handleActivation() {
+  const code = document.getElementById('activationInput').value;
+  const isEn = currentLang === 'en';
+  if(activatePlan(code)) {
+    document.getElementById('activationInput').value = '';
+    updatePlanUI();
+    alert(isEn ? '✓ Plan activated successfully!' : '✓ プランを有効化しました！');
+  } else {
+    alert(isEn ? 'Invalid code. Please check and try again.' : 'コードが無効です。確認してもう一度お試しください。');
+  }
+}
+
 detectInAppBrowser();
+updatePlanUI();
 
 </script>
 </body>
