@@ -298,17 +298,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 
 <!-- 設定タブ -->
 <div id="tab-settings" style="display:none">
-  <div class="section-title" id="settingsSectionTitle">Receipic ベータ版</div>
-  <div class="settings-box">
-    <h3 id="settingsTitle">🎉 ベータ版をお試しいただきありがとうございます！</h3>
-    <p id="settingsDesc">現在ベータテスト中です。無料で<strong>月10件まで</strong>仕訳を生成できます。</p>
-    <p style="margin-top:10px" id="settingsFeedback">フィードバックやご意見はこちらまで：<br><strong>receipic.jp@gmail.com</strong></p>
-    <div style="margin-top:12px;padding:10px 12px;background:var(--brand-light);border-radius:var(--radius);font-size:12px;color:var(--brand)" id="settingsPromo">
-      正式リリース時には有料プランをご用意予定です。ベータ版ご利用者には特別割引を予定しています！
-    </div>
-  </div>
-
-  <div class="section-title" id="activationSectionTitle" style="margin-top:1.25rem">プランのアクティベーション</div>
+  <div class="section-title" id="activationSectionTitle">プランのアクティベーション</div>
   <div class="settings-box">
     <h3 id="activationTitle">🔑 アクティベーションコードを入力</h3>
     <p id="activationDesc" style="font-size:13px;color:var(--text2);margin-bottom:12px">購入後に送付されたコードを入力してください。</p>
@@ -494,21 +484,15 @@ function applyLang() {
       : `📱 LINEやSNSアプリ内ブラウザではカメラが使えない場合があります。<br>外部ブラウザ（${isIOS ? 'Safari' : 'Chrome'}）で開くと正しく動作します。<br><button class="browser-banner-btn" onclick="openExternalBrowser()">外部ブラウザで開く</button>`;
   }
 
-  document.getElementById('settingsSectionTitle').textContent = isEn ? 'RECEIPIC BETA' : 'RECEIPIC ベータ版';
-  const actSection = document.getElementById('activationSectionTitle');
-  if(actSection) actSection.textContent = isEn ? 'PLAN ACTIVATION' : 'プランのアクティベーション';
+  document.getElementById('activationSectionTitle').textContent = isEn ? 'PLAN ACTIVATION' : 'プランのアクティベーション';
   const actTitle = document.getElementById('activationTitle');
   if(actTitle) actTitle.textContent = isEn ? '🔑 Enter Activation Code' : '🔑 アクティベーションコードを入力';
   const actDesc = document.getElementById('activationDesc');
   if(actDesc) actDesc.textContent = isEn ? 'Enter the code sent after purchase.' : '購入後に送付されたコードを入力してください。';
   const actBtn = document.getElementById('activationBtn');
   if(actBtn) actBtn.textContent = isEn ? 'Apply' : '適用';
-  const settingsPromo = document.getElementById('settingsPromo');
-  if(settingsPromo) settingsPromo.textContent = isEn ? 'Premium plans coming soon. Beta users get a special discount!' : '正式リリース時には有料プランをご用意予定です。ベータ版ご利用者には特別割引を予定しています！';
+
   updatePlanUI();
-  document.getElementById('settingsTitle').textContent = isEn ? '🎉 Thank you for trying Receipic Beta!' : '🎉 ベータ版をお試しいただきありがとうございます！';
-  document.getElementById('settingsDesc').textContent = isEn ? 'Currently in beta. Free up to 10 journal entries per month.' : '現在ベータテスト中です。無料で月10件まで仕訳を生成できます。';
-  document.getElementById('settingsFeedback').innerHTML = isEn ? 'Feedback: <strong>receipic.jp@gmail.com</strong>' : 'フィードバックやご意見はこちらまで：<br><strong>receipic.jp@gmail.com</strong>';
 
   /* 件数表示 */
   const usageUnit = document.getElementById('usageUnit');
