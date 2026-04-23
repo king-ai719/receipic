@@ -298,6 +298,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 
 <!-- 設定タブ -->
 <div id="tab-settings" style="display:none">
+  <div class="settings-box" style="margin-bottom:1rem">
+    <p id="settingsFeedback">フィードバックやご意見はこちらまで：<br><strong>receipic.jp@gmail.com</strong></p>
+  </div>
+
   <div class="section-title" id="activationSectionTitle">プランのアクティベーション</div>
   <div class="settings-box">
     <h3 id="activationTitle">🔑 アクティベーションコードを入力</h3>
@@ -493,6 +497,7 @@ function applyLang() {
   if(actBtn) actBtn.textContent = isEn ? 'Apply' : '適用';
 
   updatePlanUI();
+  document.getElementById('settingsFeedback').innerHTML = isEn ? 'Feedback: <strong>receipic.jp@gmail.com</strong>' : 'フィードバックやご意見はこちらまで：<br><strong>receipic.jp@gmail.com</strong>';
 
   /* 件数表示 */
   const usageUnit = document.getElementById('usageUnit');
