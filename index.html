@@ -452,8 +452,19 @@ function applyLang() {
   document.getElementById('resultTitle').textContent = isEn ? 'Journal Entries' : '生成された仕訳';
   document.getElementById('copyBtn').textContent = isEn ? 'Copy (Tab-separated)' : 'コピー（タブ区切り）';
   const isPaid = getCurrentPlan() !== 'free';
-  document.getElementById('csvBtn').innerHTML = isPaid ? (isEn ? 'Export CSV' : 'CSV出力') : (isEn ? '🔒 Export CSV (Premium)' : '🔒 CSV出力（有料）');
-  document.getElementById('sheetBtn').innerHTML = isPaid ? (isEn ? '📊 Open in Sheets' : '📊 スプレッドシートで開く') : (isEn ? '🔒 Spreadsheet Sync (Premium)' : '🔒 スプレッドシート連携（有料）');
+  const csvBtn = document.getElementById('csvBtn');
+  const sheetBtn = document.getElementById('sheetBtn');
+  if(isPaid) {
+    csvBtn.className = 'btn-outline';
+    csvBtn.innerHTML = isEn ? 'Export CSV' : 'CSV出力';
+    sheetBtn.className = 'btn-outline';
+    sheetBtn.innerHTML = isEn ? '📊 Open in Sheets' : '📊 スプレッドシートで開く';
+  } else {
+    csvBtn.className = 'btn-outline btn-premium';
+    csvBtn.innerHTML = isEn ? '🔒 Export CSV (Premium)' : '🔒 CSV出力（有料）';
+    sheetBtn.className = 'btn-outline btn-premium';
+    sheetBtn.innerHTML = isEn ? '🔒 Spreadsheet Sync (Premium)' : '🔒 スプレッドシート連携（有料）';
+  }
   document.getElementById('taxBtn').innerHTML = isEn ? '🔒 Tax Advisor (Premium)' : '🔒 税理士に相談（有料）';
 
   /* 設定タブ */
