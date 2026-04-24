@@ -261,7 +261,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       <button class="btn-outline" id="copyBtn" onclick="copyTSV()">コピー（タブ区切り）</button>
       <button class="btn-outline" id="csvBtn" onclick="handleCSVDownload()">CSV出力</button>
       <button class="btn-outline btn-premium" id="sheetBtn" onclick="handleSheetExport()">🔒 スプレッドシート連携（有料）</button>
-      <button class="btn-outline btn-premium" id="taxBtn" onclick="openUpgrade()">🔒 税理士に相談（有料）</button>
+      <button class="btn-outline btn-premium" id="taxBtn" onclick="handleTaxAdvisor()">🔒 税理士に相談（有料）</button>
     </div>
   </div>
 </div>
@@ -465,7 +465,14 @@ function applyLang() {
     sheetBtn.className = 'btn-outline btn-premium';
     sheetBtn.innerHTML = isEn ? '🔒 Spreadsheet Sync (Premium)' : '🔒 スプレッドシート連携（有料）';
   }
-  document.getElementById('taxBtn').innerHTML = isEn ? '🔒 Tax Advisor (Premium)' : '🔒 税理士に相談（有料）';
+  const taxBtn = document.getElementById('taxBtn');
+  if(isPaid) {
+    taxBtn.className = 'btn-outline';
+    taxBtn.innerHTML = isEn ? '👨‍💼 Tax Advisor (Coming Soon)' : '👨‍💼 税理士に相談（準備中）';
+  } else {
+    taxBtn.className = 'btn-outline btn-premium';
+    taxBtn.innerHTML = isEn ? '🔒 Tax Advisor (Premium)' : '🔒 税理士に相談（有料）';
+  }
 
   /* 設定タブ */
   /* 履歴タブ */
@@ -1008,6 +1015,19 @@ function saveEdit(idx) {
     description: document.getElementById('ei-desc').value,
   };
   renderEntries(entries);
+}
+
+function handleTaxAdvisor() {
+  const plan = getCurrentPlan();
+  const isEn = currentLang === 'en';
+  if(plan === 'free') {
+    openUpgrade();
+    return;
+  }
+  alert(isEn
+    ? '🚧 Coming soon!\n\nWe are currently looking for partner tax advisors.\nFor inquiries, please contact: receipic.jp@gmail.com'
+    : '🚧 準備中です！\n\n現在、提携税理士を探しています。\nお問い合わせは receipic.jp@gmail.com までご連絡ください。'
+  );
 }
 
 function handleSheetExport() {
