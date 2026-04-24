@@ -259,7 +259,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
     <div id="emptyResult" class="empty-state" style="display:none">まだ仕訳がありません。写真またはPDFを解析してください。</div>
     <div class="action-row">
       <button class="btn-outline" id="copyBtn" onclick="copyTSV()">コピー（タブ区切り）</button>
-      <button class="btn-outline btn-premium" id="csvBtn" onclick="openUpgrade()">🔒 CSV出力（有料）</button>
+      <button class="btn-outline" id="csvBtn" onclick="downloadCSV()">CSV出力</button>
       <button class="btn-outline btn-premium" id="sheetBtn" onclick="openUpgrade()">🔒 スプレッドシート連携（有料）</button>
       <button class="btn-outline btn-premium" id="taxBtn" onclick="openUpgrade()">🔒 税理士に相談（有料）</button>
     </div>
@@ -451,7 +451,7 @@ function applyLang() {
   /* 仕訳一覧 */
   document.getElementById('resultTitle').textContent = isEn ? 'Journal Entries' : '生成された仕訳';
   document.getElementById('copyBtn').textContent = isEn ? 'Copy (Tab-separated)' : 'コピー（タブ区切り）';
-  document.getElementById('csvBtn').innerHTML = isEn ? '🔒 Export CSV (Premium)' : '🔒 CSV出力（有料）';
+  document.getElementById('csvBtn').innerHTML = isEn ? 'Export CSV' : 'CSV出力';
   document.getElementById('sheetBtn').innerHTML = isEn ? '🔒 Spreadsheet Sync (Premium)' : '🔒 スプレッドシート連携（有料）';
   document.getElementById('taxBtn').innerHTML = isEn ? '🔒 Tax Advisor (Premium)' : '🔒 税理士に相談（有料）';
 
@@ -998,6 +998,22 @@ function saveEdit(idx) {
   renderEntries(entries);
 }
 
+function downloadCSV() {
+  if(!entries.length) return;
+  const rows = [['日付','借方科目','貸方科目','金額','税区分','摘要','出典'], ...entries.map(e => [e.date,e.debit,e.credit,e.amount,e.taxCode,e.description,e.source])];
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csv], {type: 'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `receipic_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  setStatus('success', '✓ CSVをダウンロードしました');
+  setTimeout(clearStatus, 2000);
+}
+
 function copyTSV() {
   if(!entries.length) return;
   const rows = [['日付','借方科目','貸方科目','金額','税区分','摘要','出典'], ...entries.map(e => [e.date,e.debit,e.credit,e.amount,e.taxCode,e.description,e.source])];
@@ -1212,15 +1228,35 @@ function openExternalBrowser() {
   }
 }
 
-function handleActivation() {
-  const code = document.getElementById('activationInput').value;
+async function handleActivation() {
+  const code = document.getElementById('activationInput').value.trim().toUpperCase();
   const isEn = currentLang === 'en';
-  if(activatePlan(code)) {
-    document.getElementById('activationInput').value = '';
-    updatePlanUI();
-    alert(isEn ? '✓ Plan activated successfully!' : '✓ プランを有効化しました！');
-  } else {
-    alert(isEn ? 'Invalid code. Please check and try again.' : 'コードが無効です。確認してもう一度お試しください。');
+  const btn = document.getElementById('activationBtn');
+  btn.disabled = true;
+  btn.textContent = isEn ? 'Verifying...' : '確認中...';
+
+  try {
+    const resp = await fetch('https://tight-bush-a0e1.tk-xx719.workers.dev/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    const data = await resp.json();
+    if(data.valid) {
+      const plan = data.plan === 'PRO' ? 'pro' : 'standard';
+      localStorage.setItem('receipic_plan', plan);
+      localStorage.setItem('receipic_code', code);
+      document.getElementById('activationInput').value = '';
+      updatePlanUI();
+      alert(isEn ? '✓ Plan activated successfully!' : '✓ プランを有効化しました！');
+    } else {
+      alert(isEn ? 'Invalid code. Please check and try again.' : 'コードが無効です。確認してもう一度お試しください。');
+    }
+  } catch(e) {
+    alert(isEn ? 'Connection error. Please try again.' : '接続エラーが発生しました。もう一度お試しください。');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = isEn ? 'Apply' : '適用';
   }
 }
 
