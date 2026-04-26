@@ -292,7 +292,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       </table>
     </div>
     <div class="action-row" style="margin-top:1rem">
-      <button class="btn-outline btn-premium" id="exportHistoryBtn" onclick="openUpgrade()"><span class="lock">🔒</span>CSV出力（有料）</button>
+      <button class="btn-outline btn-premium" id="exportHistoryBtn" onclick="handleHistoryCSV()"><span class="lock">🔒</span>CSV出力（有料）</button>
+      <button class="btn-outline btn-premium" id="exportHistorySheetBtn" onclick="handleHistorySheet()"><span class="lock">🔒</span>スプレッドシート（有料）</button>
       <button class="btn-outline" id="clearHistoryBtn" onclick="clearHistory()" style="color:var(--err);border-color:var(--err)">🗑️ 履歴を削除</button>
     </div>
   </div>
@@ -496,7 +497,14 @@ function applyLang() {
     if(el) el.textContent = label;
   });
   const expBtn = document.getElementById('exportHistoryBtn');
-  if(expBtn) expBtn.innerHTML = isEn ? '<span class="lock">🔒</span>Export CSV (Premium)' : '<span class="lock">🔒</span>CSV出力（有料）';
+  const expSheetBtn = document.getElementById('exportHistorySheetBtn');
+  if(isPaid) {
+    if(expBtn) { expBtn.className = 'btn-outline'; expBtn.innerHTML = isEn ? 'Export CSV' : 'CSV出力'; }
+    if(expSheetBtn) { expSheetBtn.className = 'btn-outline'; expSheetBtn.innerHTML = isEn ? '📊 Open in Sheets' : '📊 スプレッドシートで開く'; }
+  } else {
+    if(expBtn) { expBtn.className = 'btn-outline btn-premium'; expBtn.innerHTML = isEn ? '🔒 Export CSV (Premium)' : '🔒 CSV出力（有料）'; }
+    if(expSheetBtn) { expSheetBtn.className = 'btn-outline btn-premium'; expSheetBtn.innerHTML = isEn ? '🔒 Spreadsheet (Premium)' : '🔒 スプレッドシート（有料）'; }
+  }
   const clrBtn = document.getElementById('clearHistoryBtn');
   if(clrBtn) clrBtn.textContent = isEn ? '🗑️ Clear history' : '🗑️ 履歴を削除';
   const tabHistory = document.getElementById('tabHistory');
@@ -1019,6 +1027,40 @@ function saveEdit(idx) {
     description: document.getElementById('ei-desc').value,
   };
   renderEntries(entries);
+}
+
+function handleHistoryCSV() {
+  const plan = getCurrentPlan();
+  if(plan === 'free') { openUpgrade(); return; }
+  const history = loadHistory();
+  if(!history.length) return;
+  const rows = [['日付','借方科目','貸方科目','金額','税区分','摘要','出典'], ...history.map(e => [e.date,e.debit,e.credit,e.amount,e.taxCode,e.description,e.source])];
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csv], {type: 'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `receipic_history_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  setStatus('success', '✓ CSVをダウンロードしました');
+  setTimeout(clearStatus, 2000);
+}
+
+function handleHistorySheet() {
+  const plan = getCurrentPlan();
+  const isEn = currentLang === 'en';
+  if(plan === 'free') { openUpgrade(); return; }
+  handleHistoryCSV();
+  setTimeout(() => {
+    const msg = isEn
+      ? 'CSV downloaded!\n\nNext steps:\n1. Go to Google Sheets\n2. Click "File" → "Import"\n3. Upload the downloaded CSV file'
+      : 'CSVをダウンロードしました！\n\n次の手順：\n1. Googleスプレッドシートを開く\n2. 「ファイル」→「インポート」をクリック\n3. ダウンロードしたCSVファイルをアップロード';
+    if(confirm(isEn ? msg + '\n\nOpen Google Sheets now?' : msg + '\n\nGoogleスプレッドシートを開きますか？')) {
+      window.open('https://sheets.new', '_blank');
+    }
+  }, 500);
 }
 
 function handleTaxAdvisor() {
