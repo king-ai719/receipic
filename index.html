@@ -1208,23 +1208,6 @@ function renderHistory() {
   }).join('');
 }
 
-function exportHistoryCSV() {
-  const list = loadHistory();
-  if(!list.length) return;
-  const isEn = currentLang === 'en';
-  const header = isEn
-    ? ['Date','Debit','Credit','Amount','Tax','Description','Source']
-    : ['日付','借方科目','貸方科目','金額','税区分','摘要','出典'];
-  const rows = list.map(e => [e.date,e.debit,e.credit,e.amount,e.taxCode,e.description,e.source]);
-  const csv = [header,...rows].map(r => r.join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `receipic_history_${new Date().toISOString().slice(0,7)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 
 /* プラン管理 */
@@ -1232,12 +1215,6 @@ const PLANS = {
   free:     { limit: 10,  name: 'Free',     nameJa: '無料' },
   standard: { limit: 80,  name: 'Standard', nameJa: 'スタンダード' },
   pro:      { limit: 200, name: 'PRO',      nameJa: 'PRO' },
-};
-
-const ACTIVATION_CODES = {
-  /* テスト用コード - 本番では変更すること */
-  'STANDARD-2024': 'standard',
-  'PRO-2024': 'pro',
 };
 
 function getCurrentPlan() {
@@ -1248,13 +1225,6 @@ function getPlanLimit() {
   return PLANS[getCurrentPlan()].limit;
 }
 
-function activatePlan(code) {
-  const plan = ACTIVATION_CODES[code.trim().toUpperCase()];
-  if(plan) {
-    localStorage.setItem('receipic_plan', plan);
-    updatePlanUI();
-    return true;
-  }
   return false;
 }
 
