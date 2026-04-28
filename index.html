@@ -195,6 +195,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
   <button class="tab" id="tabResult" onclick="switchTab('result',this)">📋 仕訳一覧</button>
   <button class="tab" id="tabHistory" onclick="switchTab('history',this)">🕐 履歴</button>
   <button class="tab" id="tabSettings" onclick="switchTab('settings',this)">⚙️ 設定</button>
+  <button class="tab" id="tabHelp" onclick="switchTab('help',this)">❓ ヘルプ</button>
 </div>
 
 <!-- 写真タブ -->
@@ -325,6 +326,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       <button class="btn-outline btn-premium" id="exportHistorySheetBtn" onclick="handleHistorySheet()"><span class="lock">🔒</span>スプレッドシート（有料）</button>
       <button class="btn-outline" id="clearHistoryBtn" onclick="clearHistory()" style="color:var(--err);border-color:var(--err)">🗑️ 履歴を削除</button>
     </div>
+  </div>
+</div>
+
+<!-- ヘルプタブ -->
+<div id="tab-help" style="display:none">
+  <div class="section-title" id="helpSectionTitle">よくある質問</div>
+
+  <div class="settings-box" style="margin-bottom:12px">
+    <h3 id="helpQ1" style="font-size:14px;margin-bottom:6px">📝 仕訳の科目が違う場合はどうすればいいですか？</h3>
+    <p id="helpA1" style="font-size:13px;color:var(--text2)">仕訳一覧タブの各行にある「編集」ボタンから科目・金額・摘要を修正できます。AIが間違えた場合はこちらで修正してください。</p>
+  </div>
+
+  <div class="settings-box" style="margin-bottom:12px">
+    <h3 id="helpQ2" style="font-size:14px;margin-bottom:6px">🏪 業種によって勘定科目を変えられますか？</h3>
+    <p id="helpA2" style="font-size:13px;color:var(--text2)">設定タブで業種を選択できます。飲食店・美容系などを選ぶと、食材仕入を「仕入高」で出力するなど、業種に合った科目で仕訳を生成します。</p>
+  </div>
+
+  <div class="settings-box" style="margin-bottom:12px">
+    <h3 id="helpQ3" style="font-size:14px;margin-bottom:6px">🆓 無料プランでは何件まで使えますか？</h3>
+    <p id="helpA3" style="font-size:13px;color:var(--text2)">無料プランは月10件まで仕訳を生成できます。それ以上ご利用の場合はStandardプラン（月80件）またはPROプラン（月200件）へのアップグレードをご検討ください。</p>
+  </div>
+
+  <div class="settings-box" style="margin-bottom:12px">
+    <h3 id="helpQ4" style="font-size:14px;margin-bottom:6px">🔑 アクティベーションコードはどこで入力しますか？</h3>
+    <p id="helpA4" style="font-size:13px;color:var(--text2)">設定タブの「プランのアクティベーション」欄にコードを入力して「適用」を押してください。コードは購入後にメールでお送りします。別のブラウザやデバイスで使用する際は再度コードの入力が必要です。</p>
+  </div>
+
+  <div class="settings-box" style="margin-bottom:12px">
+    <h3 id="helpQ5" style="font-size:14px;margin-bottom:6px">📊 CSVやスプレッドシートに出力できますか？</h3>
+    <p id="helpA5" style="font-size:13px;color:var(--text2)">仕訳一覧タブの「CSV出力」ボタンからCSVファイルをダウンロードできます。「スプレッドシートで開く」ボタンを押すとCSVダウンロード後にGoogleスプレッドシートが開きます。どちらも有料プランの機能です。</p>
+  </div>
+
+  <div class="settings-box" style="margin-bottom:12px">
+    <h3 id="helpQ6" style="font-size:14px;margin-bottom:6px">✉️ その他のご質問は？</h3>
+    <p id="helpA6" style="font-size:13px;color:var(--text2)">上記で解決しない場合は <a href="mailto:receipic.jp@gmail.com" style="color:var(--brand);font-weight:600">receipic.jp@gmail.com</a> までお気軽にお問い合わせください。</p>
   </div>
 </div>
 
@@ -572,6 +608,20 @@ function applyLang() {
   document.getElementById('industrySectionTitle').textContent = isEn ? 'INDUSTRY SETTINGS' : '業種設定';
   document.getElementById('industryDesc').textContent = isEn ? 'Select your industry for accurate account categories.' : '業種を選択すると、AIが適切な勘定科目で仕訳を生成します。';
   updateIndustryUI();
+  document.getElementById('tabHelp').textContent = isEn ? '❓ Help' : '❓ ヘルプ';
+  document.getElementById('helpSectionTitle').textContent = isEn ? 'FAQ' : 'よくある質問';
+  document.getElementById('helpQ1').textContent = isEn ? '📝 The account category is wrong. How do I fix it?' : '📝 仕訳の科目が違う場合はどうすればいいですか？';
+  document.getElementById('helpA1').textContent = isEn ? 'Use the "Edit" button on each row in the Journal tab to correct the account, amount, or description.' : '仕訳一覧タブの各行にある「編集」ボタンから科目・金額・摘要を修正できます。AIが間違えた場合はこちらで修正してください。';
+  document.getElementById('helpQ2').textContent = isEn ? '🏪 Can I change account categories by industry?' : '🏪 業種によって勘定科目を変えられますか？';
+  document.getElementById('helpA2').textContent = isEn ? 'Select your industry in the Settings tab. For example, selecting "Service" will output food purchases as "Cost of Sales".' : '設定タブで業種を選択できます。飲食店・美容系などを選ぶと、食材仕入を「仕入高」で出力するなど、業種に合った科目で仕訳を生成します。';
+  document.getElementById('helpQ3').textContent = isEn ? '🆓 How many entries can I use on the free plan?' : '🆓 無料プランでは何件まで使えますか？';
+  document.getElementById('helpA3').textContent = isEn ? 'The free plan allows up to 10 journal entries per month. Upgrade to Standard (80/month) or PRO (200/month) for more.' : '無料プランは月10件まで仕訳を生成できます。それ以上ご利用の場合はStandardプラン（月80件）またはPROプラン（月200件）へのアップグレードをご検討ください。';
+  document.getElementById('helpQ4').textContent = isEn ? '🔑 Where do I enter the activation code?' : '🔑 アクティベーションコードはどこで入力しますか？';
+  document.getElementById('helpA4').textContent = isEn ? 'Enter your code in the "Plan Activation" section in the Settings tab. You will need to re-enter the code on a different browser or device.' : '設定タブの「プランのアクティベーション」欄にコードを入力して「適用」を押してください。別のブラウザやデバイスで使用する際は再度コードの入力が必要です。';
+  document.getElementById('helpQ5').textContent = isEn ? '📊 Can I export to CSV or Google Sheets?' : '📊 CSVやスプレッドシートに出力できますか？';
+  document.getElementById('helpA5').textContent = isEn ? 'Use the "Export CSV" button in the Journal tab. The "Open in Sheets" button downloads CSV and opens Google Sheets. Both are premium features.' : '仕訳一覧タブの「CSV出力」ボタンからCSVファイルをダウンロードできます。「スプレッドシートで開く」ボタンを押すとCSVダウンロード後にGoogleスプレッドシートが開きます。どちらも有料プランの機能です。';
+  document.getElementById('helpQ6').textContent = isEn ? '✉️ Have other questions?' : '✉️ その他のご質問は？';
+  document.getElementById('helpA6').innerHTML = isEn ? 'Contact us at <a href="mailto:receipic.jp@gmail.com" style="color:var(--brand);font-weight:600">receipic.jp@gmail.com</a>' : '<a href="mailto:receipic.jp@gmail.com" style="color:var(--brand);font-weight:600">receipic.jp@gmail.com</a> までお気軽にお問い合わせください。';
   const actTitle = document.getElementById('activationTitle');
   if(actTitle) actTitle.textContent = isEn ? '🔑 Enter Activation Code' : '🔑 アクティベーションコードを入力';
   const actDesc = document.getElementById('activationDesc');
@@ -632,7 +682,7 @@ document.getElementById('usageCount').textContent = usageCount;
 function switchTab(tab, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  ['photo','pdf','result','history','settings'].forEach(t => {
+  ['photo','pdf','result','history','settings','help'].forEach(t => {
     document.getElementById('tab-'+t).style.display = t === tab ? '' : 'none';
   });
   if(tab === 'result') renderEntries(entries);
