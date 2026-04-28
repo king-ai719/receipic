@@ -888,13 +888,27 @@ function setIndustry(type) {
 
 function updateIndustryUI() {
   const current = getIndustry();
+  const isEn = currentLang === 'en';
+  const labels = isEn
+    ? ['🎨 Creator', '💼 Service Industry', '🏪 Other']
+    : ['🎨 クリエイター系', '💼 サービス業系', '🏪 その他'];
+  const subs = isEn
+    ? ['(Influencer, Manga Artist, Writer, Designer, Engineer)', '(Restaurant, Beauty, Consultant, Instructor)', '(Real Estate, Retail, Other)']
+    : ['（インフルエンサー・漫画家・ライター・デザイナー・エンジニア）', '（飲食店・美容系・コンサルタント・講師）', '（不動産・小売・その他）'];
   const types = ['creator','service','other'];
   types.forEach((t,i) => {
     const btn = document.getElementById('industryBtn'+i);
-    if(btn) {
-      btn.classList.toggle('selected', t === current);
-    }
+    const label = document.getElementById('industryLabel'+i);
+    const sub = document.getElementById('industrySub'+i);
+    if(btn) btn.classList.toggle('selected', t === current);
+    if(label) label.textContent = labels[i];
+    if(sub) sub.textContent = subs[i];
   });
+  const statusEl = document.getElementById('industryStatus');
+  if(statusEl && current) {
+    const names = { creator: isEn ? 'Creator' : 'クリエイター系', service: isEn ? 'Service Industry' : 'サービス業系', other: isEn ? 'Other' : 'その他' };
+    statusEl.textContent = (isEn ? '✓ Set to: ' : '✓ 設定済み：') + names[current];
+  }
 }
 
 function getIndustryPromptJa() {
