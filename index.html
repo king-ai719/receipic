@@ -630,7 +630,7 @@ function applyLang() {
   if(actBtn) actBtn.textContent = isEn ? 'Apply' : '適用';
 
   updatePlanUI();
-  document.getElementById('settingsFeedback').innerHTML = isEn ? 'Feedback: <a href="mailto:receipic.jp@gmail.com" style="color:var(--brand);font-weight:600">receipic.jp@gmail.com</a><br><a href="/legal.html" target="_blank" style="font-size:13px;color:var(--text2)">Specified Commercial Transactions Act</a>' : 'フィードバックやご意見はこちらまで：<br><a href="mailto:receipic.jp@gmail.com" style="color:var(--brand);font-weight:600">receipic.jp@gmail.com</a><br><a href="/legal.html" target="_blank" style="font-size:13px;color:var(--text2)">特定商取引法に基づく表記</a>';
+  document.getElementById('settingsFeedback').innerHTML = isEn ? 'Feedback: <a href="mailto:receipic.jp@gmail.com" style="color:var(--brand);font-weight:600">receipic.jp@gmail.com</a>' : 'フィードバックやご意見はこちらまで：<br><a href="mailto:receipic.jp@gmail.com" style="color:var(--brand);font-weight:600">receipic.jp@gmail.com</a>';
 
   /* 件数表示 */
   const usageUnit = document.getElementById('usageUnit');
