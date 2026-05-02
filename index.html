@@ -229,7 +229,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
     <button class="ad-card-btn" id="adBtnPhoto" onclick="window.open('https://receipic.com','_blank')">詳しくはこちら</button>
   </div>
   <!-- 広告スペース -->
-  <div id="ad-slot-photo" style="margin-top:16px;min-height:100px;display:flex;align-items:center;justify-content:center;background:var(--color-background-secondary);border-radius:var(--radius);font-size:12px;color:var(--text2)">広告スペース</div>
+  <div id="ad-slot-photo" style="margin-top:16px;display:flex;align-items:center;justify-content:center;">
+    <a href="https://px.a8.net/svt/ejp?a8mat=4B1VU1+19UECY+2O0E+5ZU29" rel="nofollow">
+    <img border="0" width="234" height="60" alt="" src="https://www20.a8.net/svt/bgt?aid=260428393077&wid=001&eno=01&mid=s00000012443001007000&mc=1"></a>
+    <img border="0" width="1" height="1" src="https://www19.a8.net/0.gif?a8mat=4B1VU1+19UECY+2O0E+5ZU29" alt="">
+  </div>
 </div>
 
 <!-- PDFタブ -->
@@ -264,7 +268,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
     <button class="ad-card-btn" id="adBtnPdf" onclick="window.open('https://receipic.com','_blank')">詳しくはこちら</button>
   </div>
   <!-- 広告スペース -->
-  <div id="ad-slot-pdf" style="margin-top:16px;min-height:100px;display:flex;align-items:center;justify-content:center;background:var(--color-background-secondary);border-radius:var(--radius);font-size:12px;color:var(--text2)">広告スペース</div>
+  <div id="ad-slot-pdf" style="margin-top:16px;display:flex;align-items:center;justify-content:center;">
+    <a href="https://px.a8.net/svt/ejp?a8mat=4B1VU1+19UECY+2O0E+5ZU29" rel="nofollow">
+    <img border="0" width="234" height="60" alt="" src="https://www20.a8.net/svt/bgt?aid=260428393077&wid=001&eno=01&mid=s00000012443001007000&mc=1"></a>
+    <img border="0" width="1" height="1" src="https://www19.a8.net/0.gif?a8mat=4B1VU1+19UECY+2O0E+5ZU29" alt="">
+  </div>
 </div>
 <div id="tab-result" style="display:none">
   <div id="resultSection" class="result-section">
@@ -401,7 +409,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
     <p id="settingsFeedback">フィードバックやご意見はこちらまで：<br><a href="mailto:receipic.jp@gmail.com" style="color:var(--brand);font-weight:600">receipic.jp@gmail.com</a></p>
   </div>
   <!-- 広告スペース -->
-  <div id="ad-slot-settings" style="margin-top:16px;min-height:100px;display:flex;align-items:center;justify-content:center;background:var(--color-background-secondary);border-radius:var(--radius);font-size:12px;color:var(--text2)">広告スペース</div>
+  <div id="ad-slot-settings" style="margin-top:16px;display:flex;align-items:center;justify-content:center;">
+    <a href="https://px.a8.net/svt/ejp?a8mat=4B1VU1+19UECY+2O0E+5ZU29" rel="nofollow">
+    <img border="0" width="234" height="60" alt="" src="https://www20.a8.net/svt/bgt?aid=260428393077&wid=001&eno=01&mid=s00000012443001007000&mc=1"></a>
+    <img border="0" width="1" height="1" src="https://www19.a8.net/0.gif?a8mat=4B1VU1+19UECY+2O0E+5ZU29" alt="">
+  </div>
 </div>
 
 <!-- アップグレードモーダル -->
@@ -558,7 +570,7 @@ function applyLang() {
   const taxBtn = document.getElementById('taxBtn');
   if(isPaid) {
     taxBtn.className = 'btn-outline';
-    taxBtn.innerHTML = isEn ? '👨‍💼 Tax Advisor (Coming Soon)' : '👨‍💼 税理士に相談（準備中）';
+    taxBtn.innerHTML = isEn ? '👨‍💼 Find a Tax Advisor' : '👨‍💼 税理士を探す';
   } else {
     taxBtn.className = 'btn-outline btn-premium';
     taxBtn.innerHTML = isEn ? '🔒 Tax Advisor (Premium)' : '🔒 税理士に相談（有料）';
@@ -1269,15 +1281,18 @@ function handleHistorySheet() {
 
 function handleTaxAdvisor() {
   const plan = getCurrentPlan();
-  const isEn = currentLang === 'en';
   if(plan === 'free') {
     openUpgrade();
     return;
   }
-  alert(isEn
-    ? '🚧 Coming soon!\n\nWe are currently looking for partner tax advisors.\nFor inquiries, please contact: receipic.jp@gmail.com'
-    : '🚧 準備中です！\n\n現在、提携税理士を探しています。\nお問い合わせは receipic.jp@gmail.com までご連絡ください。'
-  );
+  window.open('https://px.a8.net/svt/ejp?a8mat=4B1VU1+19UECY+2O0E+67JUA', '_blank');
+  // A8トラッキング
+  const img = document.createElement('img');
+  img.src = 'https://www13.a8.net/0.gif?a8mat=4B1VU1+19UECY+2O0E+67JUA';
+  img.width = 1;
+  img.height = 1;
+  img.style.display = 'none';
+  document.body.appendChild(img);
 }
 
 function handleSheetExport() {
