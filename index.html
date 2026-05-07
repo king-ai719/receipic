@@ -1335,11 +1335,17 @@ function downloadMFCSV(targetEntries) {
     'Non-taxable': '対象外', 'Exempt': '対象外',
   };
   const headers = ['取引No','取引日','借方勘定科目','借方補助科目','借方部門','借方取引先','借方税区分','借方インボイス','借方金額(円)','借方税額','貸方勘定科目','貸方補助科目','貸方部門','貸方取引先','貸方税区分','貸方インボイス','貸方金額(円)','貸方税額','摘要','仕訳メモ','タグ','MF仕訳タイプ','決算整理仕訳','作成日時','作成者','最終更新日時','最終更新者'];
-  const rows = targetEntries.map((e, i) => [
-    i+1, e.date.replace(/-/g, '/'), e.debit, '', '', '', taxMap[e.taxCode]||'対象外', '', e.amount, '',
+  const rows = targetEntries.map((e, i) => {
+    // yyyy/mm/dd形式に変換（ゼロ埋め）
+    const dateParts = e.date.split(/[-\/]/);
+    const formattedDate = dateParts.length === 3
+      ? `${dateParts[0]}/${String(dateParts[1]).padStart(2,'0')}/${String(dateParts[2]).padStart(2,'0')}`
+      : e.date;
+    return [
+    i+1, formattedDate, e.debit, '', '', '', taxMap[e.taxCode]||'対象外', '', e.amount, '',
     e.credit, '', '', '', '対象外', '', e.amount, '', e.description,
     '', '', '', '', '', '', '', ''
-  ]);
+  ]});
   const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
