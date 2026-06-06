@@ -470,7 +470,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9taWtnbHdseXVheW13eXp5Y3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4OTY3MjMsImV4cCI6MjA5NDQ3MjcyM30.jzrS62TfWwvi1brtr8e3N4byE1w95gG5RAlWlg3vqaE';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null;
-
+let currentBilling='monthly';
 async function initAuth(){
   const{data:{session}}=await sb.auth.getSession();
   if(session)setUser(session.user);
@@ -1223,7 +1223,6 @@ function updatePlanUI(){
 const STRIPE_LINKS={standard_monthly:'https://buy.stripe.com/4gM4gA5Md14PaIA5mG1Jm00',standard_yearly:'https://buy.stripe.com/14A4gAgqRfZJ6skbL41Jm03',pro_monthly:'https://buy.stripe.com/cNi3cw2A19BlbME9CW1Jm01',pro_yearly:'https://buy.stripe.com/5kQ3cwdeF7td7wocP81Jm02'};
 function openUpgrade(){document.getElementById('upgradeModal').classList.add('open');}
 function closeUpgrade(){document.getElementById('upgradeModal').classList.remove('open');}
-let currentBilling='monthly';
 function setBilling(type){
   currentBilling=type;
   const isEn=currentLang==='en';
