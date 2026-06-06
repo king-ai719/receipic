@@ -504,9 +504,12 @@ async function handleAuth(){
   }
 }
 async function ensureUserRecord(user){
-  const{data}=await sb.from('receipic_users').select('id').eq('id',user.id).single();
+  const{data}=await sb.from('receipic_users').select('id,plan').eq('id',user.id).single();
   if(!data){
     await sb.from('receipic_users').insert({id:user.id,email:user.email});
+  }else if(data.plan && data.plan!=='free'){
+    localStorage.setItem('receipic_plan',data.plan);
+    updatePlanUI();
   }
 }
 let currentLang = localStorage.getItem('receipic_lang') || 'ja';
