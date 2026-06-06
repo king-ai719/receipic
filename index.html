@@ -205,6 +205,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
   <button class="tab" id="tabResult" onclick="switchTab('result',this)">📋 仕訳一覧</button>
   <button class="tab" id="tabHistory" onclick="switchTab('history',this)">🕐 履歴</button>
   <button class="tab" id="tabSettings" onclick="switchTab('settings',this)">⚙️ 設定</button>
+  <button class="tab" id="tabFeedback" onclick="switchTab('feedback',this)">💬 掲示板</button>
   <button class="tab" id="tabHelp" onclick="switchTab('help',this)">❓ ヘルプ</button>
 </div>
 
@@ -374,7 +375,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
     <p id="helpA6" style="font-size:13px;color:var(--text2)">上記で解決しない場合は <a href="mailto:info@tms-92.com" style="color:var(--brand);font-weight:600">info@tms-92.com</a> までお気軽にお問い合わせください。</p>
   </div>
 </div>
-
+<!-- フィードバック掲示板タブ -->
+<div id="tab-feedback" style="display:none">
+  <div class="settings-box" style="margin-bottom:12px">
+    <h3 style="font-size:14px;font-weight:600;margin-bottom:8px">💬 フィードバックを投稿</h3>
+    <textarea id="feedbackInput" placeholder="ご意見・ご要望をお聞かせください（500字以内）" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;resize:vertical;min-height:80px;background:var(--bg);color:var(--text);outline:none;font-family:inherit"></textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span id="feedbackCount" style="font-size:11px;color:var(--text3)">0 / 500</span>
+      <button class="analyze-btn" style="width:auto;padding:8px 20px;margin-top:0" onclick="submitFeedback()">投稿する</button>
+    </div>
+    <div id="feedbackStatus" style="display:none;margin-top:8px" class="status-box"></div>
+  </div>
+  <div class="result-header" style="margin-top:1.5rem">
+    <h2 style="font-size:15px;font-weight:600">みんなの声</h2>
+    <span class="result-meta" id="feedbackMeta"></span>
+  </div>
+  <div id="feedbackList" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+</div>
 <!-- 設定タブ -->
 <div id="tab-settings" style="display:none">
   <div class="section-title" id="industrySectionTitle">業種設定</div>
@@ -619,13 +636,13 @@ document.getElementById('usageCount').textContent=usageCount;
 function switchTab(tab,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  ['photo','pdf','result','history','settings','help'].forEach(t=>{
+  ['photo','pdf','result','history','settings','help','feedback'].forEach(t=>{
     document.getElementById('tab-'+t).style.display=t===tab?'':'none';
   });
   if(tab==='result')renderEntries(entries);
   if(tab==='history')renderHistory();
 }
-
+if(tab==='feedback')loadFeedback();
 let photoFiles=[];
 function handlePhotoSelect(e){
   const files=e.target.files;
@@ -1278,6 +1295,55 @@ async function handleActivation(){
     btn.disabled=false;
     btn.textContent=isEn?'Apply':'適用';
   }
+}
+  // フィードバック掲示板
+document.getElementById('feedbackInput').addEventListener('input',function(){
+  document.getElementById('feedbackCount').textContent=this.value.length+' / 500';
+});
+
+async function submitFeedback(){
+  const content=document.getElementById('feedbackInput').value.trim();
+  const statusBox=document.getElementById('feedbackStatus');
+  if(!content){return;}
+  if(content.length>500){return;}
+  statusBox.style.display='';
+  statusBox.className='status-box status-loading';
+  statusBox.innerHTML='<span class="spinner"></span>投稿中...';
+  try{
+    const{error}=await sb.from('feedback').insert({content});
+    if(error)throw error;
+    document.getElementById('feedbackInput').value='';
+    document.getElementById('feedbackCount').textContent='0 / 500';
+    statusBox.className='status-box status-success';
+    statusBox.innerHTML='✓ 投稿しました！';
+    setTimeout(()=>{statusBox.style.display='none';},3000);
+    loadFeedback();
+  }catch(e){
+    statusBox.className='status-box status-error';
+    statusBox.innerHTML='投稿に失敗しました。';
+  }
+}
+
+async function loadFeedback(){
+  const{data,error}=await sb.from('feedback')
+    .select('*')
+    .eq('is_deleted',false)
+    .order('created_at',{ascending:false})
+    .limit(50);
+  if(error||!data)return;
+  const list=document.getElementById('feedbackList');
+  const meta=document.getElementById('feedbackMeta');
+  meta.textContent=`${data.length}件`;
+  if(!data.length){
+    list.innerHTML='<div class="empty-state">まだ投稿がありません</div>';
+    return;
+  }
+  list.innerHTML=data.map(f=>`
+    <div class="settings-box" style="padding:12px 16px">
+      <div style="font-size:13px;line-height:1.6;color:var(--text)">${f.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px">${new Date(f.created_at).toLocaleDateString('ja-JP')}</div>
+    </div>
+  `).join('');
 }
 initAuth();
 detectInAppBrowser();
