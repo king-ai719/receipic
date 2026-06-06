@@ -491,7 +491,7 @@ function setUser(user){
     ensureUserRecord(user);
     renderHistory();
   }else{
-    status.textContent='ログインすると履歴がクラウドに保存されます';
+    status.textContent='status.textContent=currentLang==='en'?'Login to save history to cloud':'ログインすると履歴がクラウドに保存されます';';
     btn.textContent='Googleでログイン';
     btn.className='auth-btn';
   }
