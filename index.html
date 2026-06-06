@@ -471,6 +471,7 @@ const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null;
 let currentBilling='monthly';
+const STRIPE_LINKS={standard_monthly:'https://buy.stripe.com/4gM4gA5Md14PaIA5mG1Jm00',standard_yearly:'https://buy.stripe.com/14A4gAgqRfZJ6skbL41Jm03',pro_monthly:'https://buy.stripe.com/cNi3cw2A19BlbME9CW1Jm01',pro_yearly:'https://buy.stripe.com/5kQ3cwdeF7td7wocP81Jm02'};
 async function initAuth(){
   const{data:{session}}=await sb.auth.getSession();
   if(session)setUser(session.user);
@@ -641,8 +642,8 @@ function switchTab(tab,el){
   });
   if(tab==='result')renderEntries(entries);
   if(tab==='history')renderHistory();
-}
 if(tab==='feedback')loadFeedback();
+}
 let photoFiles=[];
 function handlePhotoSelect(e){
   const files=e.target.files;
@@ -1220,7 +1221,6 @@ function updatePlanUI(){
   }
 }
 
-const STRIPE_LINKS={standard_monthly:'https://buy.stripe.com/4gM4gA5Md14PaIA5mG1Jm00',standard_yearly:'https://buy.stripe.com/14A4gAgqRfZJ6skbL41Jm03',pro_monthly:'https://buy.stripe.com/cNi3cw2A19BlbME9CW1Jm01',pro_yearly:'https://buy.stripe.com/5kQ3cwdeF7td7wocP81Jm02'};
 function openUpgrade(){document.getElementById('upgradeModal').classList.add('open');}
 function closeUpgrade(){document.getElementById('upgradeModal').classList.remove('open');}
 function setBilling(type){
