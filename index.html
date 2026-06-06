@@ -1262,6 +1262,11 @@ async function handleActivation(){
       localStorage.setItem('receipic_plan',plan);
       localStorage.setItem('receipic_code',code);
       document.getElementById('activationInput').value='';
+      if(currentUser){
+  await sb.from('receipic_users')
+    .update({plan:plan})
+    .eq('id',currentUser.id);
+}
       updatePlanUI();
       alert(isEn?'✓ Plan activated successfully!':'✓ プランを有効化しました！');
     }else{
