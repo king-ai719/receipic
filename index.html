@@ -159,9 +159,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 .camera-btn-label{font-size:14px;font-weight:600;color:var(--text)}
 .camera-btn-sub{font-size:11px;color:var(--text3)}
 .camera-btns input[type=file]{display:none}
+  .auth-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#EEF2FF;border-radius:var(--radius);border:1px solid #C7D2FE;margin-bottom:1rem;font-size:12px}
+.auth-btn{padding:5px 12px;border:1px solid var(--brand);border-radius:6px;font-size:11px;cursor:pointer;background:var(--brand);color:#fff;font-weight:500}
+.auth-btn:hover{opacity:0.88}
+.auth-btn-out{background:transparent;color:var(--brand)}
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+  <div class="auth-bar" id="authBar">
+  <span id="authStatus">⏳ 読み込み中...</span>
+  <button class="auth-btn" id="authBtn" onclick="handleAuth()" style="margin-left:auto">Googleでログイン</button>
+</div>
 <div class="browser-banner" id="browserBanner">
   📱 LINEやSNSアプリ内ブラウザではカメラが使えない場合があります。<br>
   外部ブラウザ（Chrome・Safari）で開くと正しく動作します。
@@ -440,6 +449,48 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
 </div>
 
 <script>
+  const SUPABASE_URL='https://omikglwlyuaymwyzycvi.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9taWtnbHdseXVheW13eXp5Y3ZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4OTY3MjMsImV4cCI6MjA5NDQ3MjcyM30.jzrS62TfWwvi1brtr8e3N4byE1w95gG5RAlWlg3vqaE';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let currentUser=null;
+
+async function initAuth(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(session)setUser(session.user);
+  sb.auth.onAuthStateChange((_,session)=>{
+    if(session){setUser(session.user);}else{setUser(null);}
+  });
+}
+function setUser(user){
+  currentUser=user;
+  const bar=document.getElementById('authBar');
+  const status=document.getElementById('authStatus');
+  const btn=document.getElementById('authBtn');
+  if(user){
+    status.textContent='✓ '+user.email;
+    btn.textContent='ログアウト';
+    btn.className='auth-btn auth-btn-out';
+    ensureUserRecord(user);
+    renderHistory();
+  }else{
+    status.textContent='ログインすると履歴がクラウドに保存されます';
+    btn.textContent='Googleでログイン';
+    btn.className='auth-btn';
+  }
+}
+async function handleAuth(){
+  if(currentUser){
+    await sb.auth.signOut();
+  }else{
+    await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://receipic.com'}});
+  }
+}
+async function ensureUserRecord(user){
+  const{data}=await sb.from('receipic_users').select('id').eq('id',user.id).single();
+  if(!data){
+    await sb.from('receipic_users').insert({id:user.id,email:user.email});
+  }
+}
 let currentLang = localStorage.getItem('receipic_lang') || 'ja';
 const T = {
   ja:{appName:'Receipic',freePlan:'無料プラン',usage:'今月の処理件数',upgrade:'アップグレード',tabPhoto:'📷 写真',tabPdf:'📄 PDF',tabResult:'📋 仕訳一覧',tabSettings:'⚙️ 設定',analyzePhoto:'写真を解析して仕訳を作成',analyzePdf:'PDFを解析して仕訳を作成',cameraBtn:'カメラで撮影',cameraSub:'領収書・レシートをその場で',galleryBtn:'画像を選択',gallerySub:'カメラロールから選ぶ',resultTitle:'生成された仕訳',copy:'コピー（タブ区切り）',csvPremium:'CSV出力（有料）',sheetPremium:'スプレッドシート連携（有料）',taxPremium:'税理士に相談（有料）',date:'日付',debit:'借方科目',credit:'貸方科目',amount:'金額',tax:'税区分',desc:'摘要',source:'出典',edit:'編集',save:'保存',cancel:'取消',analyzing:'を解析中...',success:'件の仕訳を生成しました',noData:'データなし',adBanner:'📢 広告スペース（無料プラン）— アップグレードで非表示に'},
@@ -1066,21 +1117,50 @@ function copyTSV(){
   });
 }
 
-function saveToHistory(newEntries){
+async function saveToHistory(newEntries){
   const key='receipic_history';
   const existing=JSON.parse(localStorage.getItem(key)||'[]');
-  const merged=[...existing,...newEntries];
-  localStorage.setItem(key,JSON.stringify(merged));
+  localStorage.setItem(key,JSON.stringify([...existing,...newEntries]));
+  if(!currentUser)return;
+  const rows=newEntries.map(e=>({
+    user_id:currentUser.id,
+    date:e.date||null,
+    debit:e.debit||null,
+    credit:e.credit||null,
+    amount:Number(e.amount)||0,
+    tax_code:e.taxCode||null,
+    description:e.description||null,
+    source:e.source||null,
+    invoice_number:e.invoiceNumber||null
+  }));
+  await sb.from('receipic_receipts').insert(rows);
 }
-function loadHistory(){return JSON.parse(localStorage.getItem('receipic_history')||'[]');}
-function clearHistory(){
-  if(confirm(currentLang==='en'?'Clear all history?':'履歴をすべて削除しますか？')){
-    localStorage.removeItem('receipic_history');
-    renderHistory();
+async function loadHistory(){
+  if(currentUser){
+    const{data,error}=await sb.from('receipic_receipts')
+      .select('*').eq('user_id',currentUser.id)
+      .order('date',{ascending:false}).limit(500);
+    if(!error&&data){
+      return data.map(r=>({
+        date:r.date,debit:r.debit,credit:r.credit,
+        amount:r.amount,taxCode:r.tax_code,
+        description:r.description,source:r.source,
+        invoiceNumber:r.invoice_number,id:r.id
+      }));
+    }
   }
+  return JSON.parse(localStorage.getItem('receipic_history')||'[]');
 }
-function renderHistory(){
-  const list=loadHistory();
+async function clearHistory(){
+  if(!confirm(currentLang==='en'?'Clear all history?':'履歴をすべて削除しますか？'))return;
+  localStorage.removeItem('receipic_history');
+  if(currentUser){
+    await sb.from('receipic_receipts').delete().eq('user_id',currentUser.id);
+  }
+  renderHistory();
+}
+async function renderHistory(){
+  const list=await loadHistory();
   const tbody=document.getElementById('historyBody');
   const meta=document.getElementById('historyMeta');
   const isEn=currentLang==='en';
@@ -1090,7 +1170,6 @@ function renderHistory(){
   const sorted=[...list].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   tbody.innerHTML=sorted.map(e=>{
     const amt=Number(e.amount||0).toLocaleString('ja-JP');
-    const src=String(e.source||'').replace(/\.pdf$/i,'').slice(0,12);
     const taxCl=(e.taxCode||'').includes('課税')?'tax-badge':'tax-badge free';
     return `<tr>
       <td>${e.date||''}</td>
@@ -1195,7 +1274,7 @@ async function handleActivation(){
     btn.textContent=isEn?'Apply':'適用';
   }
 }
-
+initAuth();
 detectInAppBrowser();
 updatePlanUI();
 updateIndustryUI();
