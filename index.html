@@ -627,6 +627,22 @@ function applyLang(){
     if(s)s.textContent=adSub;
     if(b)b.textContent=adBtnTxt;
   });
+  const tabFeedback=document.getElementById('tabFeedback');
+if(tabFeedback)tabFeedback.textContent=isEn?'💬 Board':'💬 掲示板';
+const feedbackTitle=document.getElementById('feedbackInput');
+if(feedbackTitle)feedbackTitle.placeholder=isEn?'Share your feedback (max 500 chars)':'ご意見・ご要望をお聞かせください（500字以内）';
+const feedbackBtn=document.querySelector('#tab-feedback .analyze-btn');
+if(feedbackBtn)feedbackBtn.textContent=isEn?'Post':'投稿する';
+const feedbackHeader=document.querySelector('#tab-feedback h3');
+if(feedbackHeader)feedbackHeader.textContent=isEn?'💬 Post Feedback':'💬 フィードバックを投稿';
+const feedbackVoice=document.querySelector('#tab-feedback .result-header h2');
+if(feedbackVoice)feedbackVoice.textContent=isEn?'Community Voice':'みんなの声';
+  const mfBtn=document.getElementById('mfBtn');
+if(mfBtn&&getCurrentPlan()!=='free')mfBtn.innerHTML=isEn?'📊 MF Export':'📊 MFクラウド出力';
+const mfHistBtn=document.getElementById('exportHistoryMfBtn');
+if(mfHistBtn&&getCurrentPlan()!=='free')mfHistBtn.innerHTML=isEn?'📊 MF Export':'📊 MFクラウド出力';
+const footer=document.querySelector('[href="/legal.html"]');
+if(footer)footer.textContent=isEn?'Legal Notice':'特定商取引法に基づく表記';
   if(entries.length)renderEntries(entries);
 }
 
