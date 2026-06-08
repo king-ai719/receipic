@@ -322,6 +322,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI'
       <h2 id="historyTitle">保存済み仕訳</h2>
       <span class="result-meta" id="historyMeta"></span>
     </div>
+    <div style="margin-bottom:16px">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <select id="reviewMonth" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;background:var(--bg);color:var(--text)"></select>
+    <button class="btn-outline" onclick="generateReview()" id="reviewBtn">🤖 AIレビュー生成</button>
+  </div>
+  <div id="reviewResult" style="display:none" class="status-box status-success"></div>
+</div>
     <div class="table-wrap">
       <table class="entries-table">
         <thead>
@@ -1363,6 +1370,59 @@ async function loadFeedback(){
     </div>
   `).join('');
 }
+  async function generateReview(){
+  if(!currentUser){alert('ログインが必要です');return;}
+  const yearMonth=document.getElementById('reviewMonth').value;
+  if(!yearMonth)return;
+  const btn=document.getElementById('reviewBtn');
+  const result=document.getElementById('reviewResult');
+  btn.disabled=true;
+  btn.textContent='生成中...';
+  result.style.display='';
+  result.className='status-box status-loading';
+  result.innerHTML='<span class="spinner"></span>AIがレビューを生成中...';
+  try{
+    const{data,error}=await sb.from('receipic_receipts')
+      .select('*').eq('user_id',currentUser.id)
+      .gte('date',yearMonth+'-01')
+      .lte('date',yearMonth+'-31');
+    if(error)throw error;
+    if(!data||!data.length){
+      result.className='status-box status-warn';
+      result.innerHTML='該当月のデータがありません。';
+      return;
+    }
+    const resp=await fetch('https://tight-bush-a0e1.tk-xx719.workers.dev/ai-review',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({receipts:data,yearMonth})
+    });
+    const json=await resp.json();
+    result.className='status-box status-success';
+    result.innerHTML=`<strong>🤖 ${yearMonth} AIレビュー</strong><br><br>${json.comment}<br><br><span style="font-size:11px;color:var(--text2)">※AIによる参考情報です。詳細は税理士へご確認ください。</span>`;
+  }catch(e){
+    result.className='status-box status-error';
+    result.innerHTML='レビューの生成に失敗しました。';
+  }finally{
+    btn.disabled=false;
+    btn.textContent='🤖 AIレビュー生成';
+  }
+}
+function initReviewMonth(){
+  const sel=document.getElementById('reviewMonth');
+  if(!sel)return;
+  const now=new Date();
+  sel.innerHTML='';
+  for(let i=0;i<12;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const ym=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const opt=document.createElement('option');
+    opt.value=ym;
+    opt.textContent=ym;
+    sel.appendChild(opt);
+  }
+}
+initReviewMonth();
 initAuth();
 detectInAppBrowser();
 updatePlanUI();
